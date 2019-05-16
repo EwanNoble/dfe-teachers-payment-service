@@ -1,0 +1,36 @@
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+   
+    <h1 class="govuk-heading-xl">
+      Load Modal Dialog
+    </h1>
+
+    <h2 class="govuk-heading-m">
+      This should load the dialog after 10 seconds of inactivity
+    </h2>
+
+    <p class="govuk-body">
+      For the real thing we will change the timing to be e.g.30 minutes
+    </p>
+
+    <a href="#open-modal" class="govuk-button">Load modal dialog</a>
+    
+  </div>
+</div>
+
+<div id="open-modal" class="modal-window" role="alertdialog" aria-labelledby="modal-title" aria-modal="true">
+  <div>
+    <h1 class="govuk-heading-xl" id="modal-title" role="alert">
+      Your session will expire in <span role="timer">2 minutes</span>
+      <!--span to handle countdown in JS version for AT users-->
+      <!--Starts empty then popuplated with periodic udpdates 1min, 30 seconds-->
+      <!--Your session will expire in TIME REMAINING-->
+    </h1>
+    <p class="govuk-body">
+      We won't be able to save what you have done and you will loose
+      your progress.
+    </p>
+    
+    <a href="/claim/show_modal" title="Close" class="govuk-button govuk-!-margin-0" tabindex="2">Continue</a>
+  </div>
+</div>

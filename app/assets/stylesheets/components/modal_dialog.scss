@@ -1,0 +1,89 @@
+
+/// Mixin to prefix several properties at once
+/// @author Hugo Giraudel
+/// @param {Map} $declarations - Declarations to prefix
+/// @param {List} $prefixes (()) - List of prefixes to print
+@mixin prefix($declarations, $prefixes: ()) {
+    @each $property, $value in $declarations {
+      @each $prefix in $prefixes {
+        #{'-' + $prefix + '-' + $property}: $value;
+      }
+  
+      // Output standard non-prefixed declaration
+      #{$property}: $value;
+    }
+  }
+
+// Enter the time until the non js dialog appears in minutes as mDelay
+$mDelay: 0.1;
+$sDelay: $mDelay * 60s;
+
+@keyframes show-dialog {
+  0%   {opacity:0; pointer-events:none;}
+  100%  {opacity:1; pointer-events:auto;}
+}
+
+.modal-window {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.35);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  animation-delay: $sDelay;
+  @include prefix((
+    animation-fill-mode: forwards,
+    animation-duration: 0.2s,
+    animation-name: show-dialog,
+    transition: all 0.3s,
+    animation-iteration-count:1
+  ), webkit moz o);
+
+    &:target, &.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    &>div {
+      width: 400px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 2em;
+      background: #ffffff;
+    }
+    header {
+      font-weight: bold;
+    }
+    h1 {
+      font-size: 150%;
+      margin: 0 0 15px;
+    }
+}
+  
+  .modal-close {
+    color: #aaa;
+    line-height: 50px;
+    font-size: 80%;
+    position: absolute;
+    right: 0;
+    text-align: center;
+    top: 0;
+    width: 70px;
+    text-decoration: none;
+    &:hover {
+      color: black;
+    }
+  }
+  
+@media (max-width: 349px) {
+    .modal-window {
+        &>div{
+            width:70%;
+          
+        }
+    }
+}
