@@ -48,12 +48,14 @@ $sDelay: $mDelay * 60s;
     }
     &>div {
       width: 400px;
+      max-height: 50%;
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       padding: 2em;
       background: #ffffff;
+      overflow-y:auto;
     }
     header {
       font-weight: bold;
@@ -79,7 +81,7 @@ $sDelay: $mDelay * 60s;
     }
   }
   
-@media (max-width: 349px) {
+@media (max-width: 415px) {
     .modal-window {
         &>div{
             width:70%;
