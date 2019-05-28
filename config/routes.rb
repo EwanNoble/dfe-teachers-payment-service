@@ -7,4 +7,5 @@ Rails.application.routes.draw do
   end
   get "/claim/ineligible", to: "claims#ineligible", as: :ineligible_claim
   get "/claim/timeout", to: "claims#timeout", as: :timeout_claim
+  get "/claim/bank_details", to: "claims#bank_details"
 end

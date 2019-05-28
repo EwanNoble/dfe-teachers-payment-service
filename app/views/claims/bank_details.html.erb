@@ -1,0 +1,52 @@
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+      <fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--xl">
+          <h1 class="govuk-fieldset__heading">
+            Your bank account details
+          </h1>
+        </legend>
+
+        <p class="govuk-body govuk-hint">
+          We need to collect this information to pay you.
+        </p>
+
+        <!-- <div class="govuk-inset-text">
+        <%= image_tag("ssl-lock.png", size:"48" ,class:"inline-image") %> We use SSL to securely send your information. Look for the padlock icon in the address bar.
+        </div> -->
+
+        <div class="govuk-form-group">
+          <label class="govuk-label" for="account-holder">
+            Name of account holder
+          </label>
+          <input class="govuk-input govuk-input--width-20" id="account-holder" name="account-holder" type="text">
+        </div>
+
+        <div class="govuk-form-group">
+          <label class="govuk-label" for="sort-code">
+            Sort code
+          </label>
+          <span id="sort-code-hint" class="govuk-hint">
+            For example: 44 00 26
+          </span>
+          <input class="govuk-input govuk-!-width-one-quarter" id="sort-code" name="sort-code" type="text" aria-describedby="sort-code-hint" pattern="[0-9]{6}">
+        </div>
+
+        <div class="govuk-form-group">
+          <label class="govuk-label" for="account-number">
+            Account number
+          </label>
+          <span id="account-number-hint" class="govuk-hint">
+            For example: 70 87 24 90
+          </span>
+          <input class="govuk-input govuk-input--width-20" id="account-number" name="account-number" type="text" aria-describedby="account-number-hint" pattern="[0-9]{8}">
+        </div>
+
+      </fieldset>
+      <button type="submit" class="govuk-button">
+        Continue
+      </button>
+
+  </div>
+</div>
