@@ -25,7 +25,7 @@ Architecture decision records can be found in the
      `File > Import Items`. Double click the imported certificate and change the
      “When using this certificate:” dropdown to `Always Trust` in the Trust
      section.
-2. Run `bundle install` to install the gem dependencies
+2. Run `bundle install` and `yarn install` to install the dependencies
 3. Run `bundle exec rails db:setup` to set up the database development
 4. Run `bundle exec foreman start` to launch the app on https://localhost:3000
 
