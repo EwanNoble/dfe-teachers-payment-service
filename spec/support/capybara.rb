@@ -1,12 +1,16 @@
 require "capybara/rspec"
 
-chrome_bin = ENV.fetch("GOOGLE_CHROME_SHIM", nil)
-chrome_opts = chrome_bin ? { "chromeOptions" => { "binary" => chrome_bin } } : { "chromeOptions" => { "args" => %w[headless no-sandbox] } }
+chrome_bin = ENV.fetch("GOOGLE_CHROME_BIN", nil)
 
 Capybara.register_driver :headless_chrome do |app|
-  options = ::Selenium::WebDriver::Chrome::Options.new
-  options.add_argument 'headless'
-  Capybara::Selenium::Driver.new app, browser: :chrome, options: options, desired_capabilities: Selenium::WebDriver::Remote::Capabilities.chrome(chrome_opts)
+  Selenium::WebDriver::Chrome.path = chrome_bin if chrome_bin.present?
+  Capybara::Selenium::Driver.new(
+    app,
+    browser: :chrome,
+    options: Selenium::WebDriver::Chrome::Options.new(
+      args: %w[headless disable-dev-shm-usage no-sandbox]
+    )
+  )
 end
 
 Capybara.configure do |config|
