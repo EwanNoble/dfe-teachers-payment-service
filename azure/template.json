@@ -6,6 +6,9 @@
       "type": "string",
       "defaultValue": "[resourceGroup().name]"
     },
+    "deliveryTeamUserGroupObjectId": {
+      "type": "string"
+    },
     "appServiceDockerImage": {
       "type": "string"
     },
@@ -53,6 +56,7 @@
   },
   "variables": {
     "deploymentUrlBase": "https://raw.githubusercontent.com/DFE-Digital/bat-platform-building-blocks/master/templates/",
+    "keyVaultName": "[concat(parameters('resourceNamePrefix'), '-kv')]",
     "storageAccountName": "[replace(concat(parameters('resourceNamePrefix'), 'storage'), '-', '')]",
     "databaseServerName": "[concat(parameters('resourceNamePrefix'), '-db')]",
     "appServicePlanName": "[concat(parameters('resourceNamePrefix'), '-asp')]",
@@ -60,6 +64,34 @@
     "appServiceRuntimeStack": "[concat('DOCKER|', parameters('appServiceDockerImage'))]"
   },
   "resources": [
+    {
+      "apiVersion": "2017-05-10",
+      "name": "key-vault",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('deploymentUrlBase'), 'keyvault.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "keyVaultName": {
+            "value": "[variables('keyVaultName')]"
+          },
+          "accessPolicies": {
+            "value": [
+              {
+                "tenantId": "[subscription().tenantId]",
+                "objectId": "[parameters('deliveryTeamUserGroupObjectId')]",
+                "permissions": {
+                  "secrets": ["get", "list", "set", "delete"]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
     {
       "apiVersion": "2017-05-10",
       "name": "storage-account",
