@@ -59,6 +59,7 @@
     "keyVaultName": "[concat(parameters('resourceNamePrefix'), '-kv')]",
     "storageAccountName": "[replace(concat(parameters('resourceNamePrefix'), 'storage'), '-', '')]",
     "databaseServerName": "[concat(parameters('resourceNamePrefix'), '-db')]",
+    "appServiceIdentityName": "[concat(parameters('resourceNamePrefix'), '-asi')]",
     "appServicePlanName": "[concat(parameters('resourceNamePrefix'), '-asp')]",
     "appServicePlanId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
     "appServiceName": "[concat(parameters('resourceNamePrefix'), '-as')]",
@@ -66,9 +67,16 @@
   },
   "resources": [
     {
+      "apiVersion": "2018-11-30",
+      "name": "[variables('appServiceIdentityName')]",
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "location": "[resourceGroup().location]"
+    },
+    {
       "apiVersion": "2017-05-10",
       "name": "key-vault",
       "type": "Microsoft.Resources/deployments",
+      "dependsOn": ["[variables('appServiceIdentityName')]"],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -86,6 +94,13 @@
                 "objectId": "[parameters('deliveryTeamUserGroupObjectId')]",
                 "permissions": {
                   "secrets": ["get", "list", "set", "delete"]
+                }
+              },
+              {
+                "tenantId": "[reference(variables('appServiceIdentityName')).tenantId]",
+                "objectId": "[reference(variables('appServiceIdentityName')).principalId]",
+                "permissions": {
+                  "secrets": ["get"]
                 }
               }
             ]
@@ -184,7 +199,13 @@
       "type": "Microsoft.Web/sites",
       "kind": "app,linux,container",
       "location": "[resourceGroup().location]",
-      "dependsOn": ["app-service-plan", "database-server"],
+      "dependsOn": ["app-service-plan", "database-server", "key-vault"],
+      "identity": {
+        "type": "userAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('appServiceIdentityName'))]": {}
+        }
+      },
       "properties": {
         "clientAffinityEnabled": false,
         "httpsOnly": true,
@@ -254,7 +275,7 @@
           "name": "staging",
           "type": "slots",
           "location": "[resourceGroup().location]",
-          "dependsOn": ["app-service-plan", "database-server", "[variables('appServiceName')]"],
+          "dependsOn": ["app-service-plan", "database-server", "key-vault", "[variables('appServiceName')]"],
           "properties": {
             "clientAffinityEnabled": false,
             "httpsOnly": true,
