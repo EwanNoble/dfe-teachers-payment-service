@@ -2,9 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "deliveryTeamUserGroupObjectId": {
-      "value": "6642920a-1aab-49bb-9a20-365131195349"
-    },
     "appServiceDockerImage": {
       "value": "pezholio/teacher-payment-service"
     },
@@ -24,10 +21,20 @@
       "value": "827a46887bf03dfbe280c10dc00110ef44c7608e0dadbb16f2fbdd1cace12c005801d847c04db0a132f2f2b9de861eee5dd5b43a979613cb985ff857bdbb7a6b"
     },
     "BASIC_AUTH_USERNAME": {
-      "value": "user"
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/${subscriptionId}/resourceGroups/${vaultGroup}/providers/Microsoft.KeyVault/vaults/${vaultName}"
+        },
+        "secretName": "BasicAuthUsername"
+      }
     },
     "BASIC_AUTH_PASSWORD": {
-      "value": "password"
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/${subscriptionId}/resourceGroups/${vaultGroup}/providers/Microsoft.KeyVault/vaults/${vaultName}"
+        },
+        "secretName": "BasicAuthPassword"
+      }
     },
     "DFE_SIGN_IN_ISSUER": {
       "value": ""
