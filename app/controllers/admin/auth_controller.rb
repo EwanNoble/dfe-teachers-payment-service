@@ -1,6 +1,6 @@
 module Admin
-  class AuthController < BaseAdminController
-    skip_before_action :ensure_authenticated_user
+  class AuthController < ApplicationController
+    before_action :update_last_seen_at, only: [:callback]
 
     def sign_in
     end

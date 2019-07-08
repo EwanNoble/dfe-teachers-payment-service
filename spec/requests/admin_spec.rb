@@ -8,6 +8,7 @@ RSpec.describe "Admin", type: :request do
 
         expect(response).to redirect_to(admin_sign_in_path)
         expect(session[:login]).to be_nil
+        expect(session[:last_seen_at]).to be_nil
       end
     end
 
@@ -27,6 +28,7 @@ RSpec.describe "Admin", type: :request do
         expect(response).to be_successful
         expect(response.body).to include("Admin")
         expect(session[:login]).to eql({"email" => "test-dfe-sign-in@host.tld"})
+        expect(session[:last_seen_at]).to_not be_nil
       end
 
       context "and they sign out" do
@@ -34,6 +36,7 @@ RSpec.describe "Admin", type: :request do
           delete admin_sign_out_path
 
           expect(session[:login]).to be_nil
+          expect(session[:last_seen_at]).to be_nil
         end
       end
     end
@@ -48,6 +51,7 @@ RSpec.describe "Admin", type: :request do
         follow_redirect!
 
         expect(session[:login]).to be_nil
+        expect(session[:last_seen_at]).to be_nil
         expect(response.body).to redirect_to(
           admin_auth_failure_path(message: :invalid_credentials, strategy: :dfe)
         )
