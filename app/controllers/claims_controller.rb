@@ -1,12 +1,9 @@
 class ClaimsController < ApplicationController
-  TIMEOUT_LENGTH_IN_MINUTES = 30
-  TIMEOUT_WARNING_LENGTH_IN_MINUTES = 2
-
   before_action :send_unstarted_claiments_to_the_start, only: [:show, :update, :ineligible]
   before_action :end_expired_sessions
   before_action :update_last_seen_at
 
-  after_action :clear_claim_session, if: :submission_complete?
+  after_action :clear_session, if: :submission_complete?
 
   def new
   end
@@ -115,26 +112,7 @@ class ClaimsController < ApplicationController
     params[:slug].underscore
   end
 
-  def update_last_seen_at
-    session[:last_seen_at] = Time.zone.now
-  end
-
-  def end_expired_sessions
-    if claim_session_timed_out?
-      clear_claim_session
-      redirect_to timeout_claim_path
-    end
-  end
-
-  def claim_session_timed_out?
-    session.key?(:tslr_claim_id) &&
-      session.key?(:last_seen_at) &&
-      session[:last_seen_at] < TIMEOUT_LENGTH_IN_MINUTES.minutes.ago
-  end
-
-  def clear_claim_session
-    session.delete(:tslr_claim_id)
-    session.delete(:last_seen_at)
-    session.delete(:verify_request_id)
+  def timeout_path
+    timeout_claim_path
   end
 end
