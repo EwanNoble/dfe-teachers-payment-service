@@ -10,7 +10,8 @@ RSpec.feature "Changing the answers on a submittable claim" do
       employment_status: :different_school,
       physics_taught: true,
       claim_school: claim_school,
-      current_school: current_school)
+      current_school: current_school,
+      student_loan_country: :england,)
   end
 
   before do
