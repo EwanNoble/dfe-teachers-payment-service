@@ -10,6 +10,13 @@ Rails.application.routes.draw do
   get "/claim/timeout", to: "claims#timeout", as: :timeout_claim
   get "/claim/refresh-session", to: "claims#refresh_session"
 
+  # Sample pages for Verify Errors
+
+  get "/claim/verify-success", to: "claims#verify_success"
+  get "/claim/verify-error-no-auth", to: "claims#verify_error_no_auth"
+  get "/claim/verify-error-auth-fail", to: "claims#verify_error_auth_fail"
+  get "/claim/verify-error-amended-response", to: "claims#verify_error_amended_response"
+
   constraints lambda { |req| req.format == :json } do
     defaults format: :json do
       resources :school_search, only: [:create]
