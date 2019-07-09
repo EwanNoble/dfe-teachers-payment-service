@@ -22,6 +22,19 @@ RSpec.describe PageSequence do
       page_sequence = PageSequence.new(claim, "still-teaching")
       expect(page_sequence.slugs).to include("student-loan-country")
     end
+
+    it "excludes “student-loan-how-many-courses” when the claimant received their student loan in Scotland or Northern Ireland" do
+      claim.student_loan = true
+
+      claim.student_loan_country = "northern_ireland"
+
+      page_sequence = PageSequence.new(claim, "still-teaching")
+      expect(page_sequence.slugs).not_to include("student-loan-how-many-courses")
+
+      claim.student_loan_country = "england"
+      page_sequence = PageSequence.new(claim, "still-teaching")
+      expect(page_sequence.slugs).to include("student-loan-how-many-courses")
+    end
   end
 
   describe "#next_slug" do

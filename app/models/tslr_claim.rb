@@ -17,6 +17,11 @@ class TslrClaim < ApplicationRecord
     :languages_taught,
   ].freeze
 
+  COUNTRIES_WITH_SINGLE_STUDENT_LOAN_PLAN = [
+    "scotland",
+    "northern_ireland",
+  ].freeze
+
   TRN_LENGTH = 7
 
   enum student_loan_country: {
@@ -24,6 +29,11 @@ class TslrClaim < ApplicationRecord
     northern_ireland: 1,
     scotland: 2,
     wales: 3,
+  }
+
+  enum student_loan_courses: {
+    one_course: 0,
+    two_or_more_courses: 1,
   }
 
   enum employment_status: {
@@ -70,6 +80,8 @@ class TslrClaim < ApplicationRecord
 
   validates :student_loan,                      on: [:"student-loan", :submit], inclusion: {in: [true, false], message: "Select either Yes or No"}
   validates :student_loan_country,              on: [:"student-loan-country", :submit], presence: {message: "Select a country"}
+  validates :student_loan_courses,              on: [:"student-loan-how-many-courses", :submit],
+                                                inclusion: {in: student_loan_courses, message: "Select How many higher education courses have you studied"}
 
   validates :student_loan_repayment_amount, on: [:"student-loan-amount", :submit], presence: {message: "Enter your student loan repayment amount"}
   validates_numericality_of :student_loan_repayment_amount, message: "Enter a valid monetary amount",
@@ -152,6 +164,10 @@ class TslrClaim < ApplicationRecord
 
   def subjects_taught
     SUBJECT_FIELDS.select { |s| send(s) == true }
+  end
+
+  def countries_with_single_student_loan_plan
+    COUNTRIES_WITH_SINGLE_STUDENT_LOAN_PLAN
   end
 
   private

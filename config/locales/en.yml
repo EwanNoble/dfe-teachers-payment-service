@@ -56,6 +56,9 @@ en:
         student_loan:
           question: "Do you currently have a student loan?"
           hint:  "We need this information to ensure we pay you the correct amount after tax."
+        student_loan_how_many_courses:
+          question: "How many higher education courses have you studied?"
+          hint: "This includes university degree, PGCE and Initial Teacher Training courses. "
         student_loan_country: "When you first applied for your student loan in which country was your home address?"
       student_loan_amount:
         "How much student loan did you repay while you were at %{claim_school_name} between 6 April XXXX and 5 April
