@@ -81,6 +81,7 @@ class ClaimsController < ApplicationController
       :date_of_birth,
       :teacher_reference_number,
       :national_insurance_number,
+      :student_loan,
       :student_loan_repayment_amount,
       :email_address,
       :bank_sort_code,

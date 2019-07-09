@@ -61,6 +61,8 @@ class TslrClaim < ApplicationRecord
   validates :national_insurance_number, on: [:"national-insurance-number", :submit], presence: {message: "Enter your National Insurance number"}
   validate  :ni_number_is_correct_format
 
+  validates :student_loan,                      on: [:"student-loan", :submit], inclusion: {in: [true, false], message: "Select either Yes or No"}
+
   validates :student_loan_repayment_amount, on: [:"student-loan-amount", :submit], presence: {message: "Enter your student loan repayment amount"}
   validates_numericality_of :student_loan_repayment_amount, message: "Enter a valid monetary amount",
                                                             allow_nil: true,
