@@ -42,6 +42,12 @@ class TslrClaim < ApplicationRecord
     some_before_some_after_first_september_2012: 2,
   }
 
+  enum student_loan_plan: {
+    plan_1: 0,
+    plan_2: 1,
+    plan_1_and_2: 2,
+  }
+
   enum employment_status: {
     claim_school: 0,
     different_school: 1,
@@ -110,6 +116,8 @@ class TslrClaim < ApplicationRecord
 
   before_validation :reset_inferred_current_school, if: ->(record) { record.persisted? && record.employment_status_changed? }
 
+  before_save :determine_student_loan_plan
+
   before_save :normalise_trn, if: :teacher_reference_number_changed?
   before_save :normalise_ni_number, if: :national_insurance_number_changed?
   before_save :normalise_bank_account_number, if: :bank_account_number_changed?
@@ -176,6 +184,19 @@ class TslrClaim < ApplicationRecord
 
   def countries_with_single_student_loan_plan
     COUNTRIES_WITH_SINGLE_STUDENT_LOAN_PLAN
+  end
+
+
+  def determine_student_loan_plan
+    # no student loan plan
+    self.student_loan_plan = nil if student_loan == false
+    # plan 1
+    self.student_loan_plan = :plan_1 if countries_with_single_student_loan_plan.include?(student_loan_country)
+    self.student_loan_plan = :plan_1 if student_loan_courses? && student_loan_start_date == "before_first_september_2012"
+    # plan 2
+    self.student_loan_plan = :plan_2 if student_loan_courses? && student_loan_start_date == "on_or_after_first_september_2012"
+    # plan 1 and 2
+    self.student_loan_plan = :plan_1_and_2 if student_loan_courses? && student_loan_start_date == "some_before_some_after_first_september_2012"
   end
 
   private

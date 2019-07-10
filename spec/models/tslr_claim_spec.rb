@@ -90,6 +90,14 @@ RSpec.describe TslrClaim, type: :model do
     end
   end
 
+  context "that has a student loan plan" do
+    it "validates the plan" do
+      expect(TslrClaim.new(student_loan_plan: :plan_1)).to be_valid
+
+      expect { TslrClaim.new(student_loan_plan: :plan_42) }.to raise_error(ArgumentError)
+    end
+  end
+
   context "when saving in the “qts-year” validation context" do
     let(:custom_validation_context) { :"qts-year" }
 
@@ -508,6 +516,92 @@ RSpec.describe TslrClaim, type: :model do
 
       it "returns an empty array" do
         expect(claim.subjects_taught).to eq([])
+      end
+    end
+  end
+
+  describe "#determine_student_loan_plan" do
+    context "when the claim has no student loan" do
+      it "leaves the student loan plan as nil" do
+        claim = TslrClaim.create!(student_loan: false)
+        expect(claim.student_loan_plan).to be_nil
+      end
+    end
+    context "when the claim has a student loan" do
+      let(:claim) { TslrClaim.new(student_loan: true) }
+
+      context "which was received in Scotland or Northern Ireland" do
+        before do
+          claim.student_loan_country = :scotland
+        end
+
+        it "sets the student loan plan to “Plan 1”" do
+          claim.save!
+          expect(claim.student_loan_plan).to eq("plan_1")
+        end
+      end
+
+      context "which was received in England or Wales" do
+        before do
+          claim.student_loan_country = :england
+        end
+
+        context "and only a single course" do
+          before do
+            claim.student_loan_courses = :one_course
+          end
+
+          context "which was started before 1 September 2012" do
+            it "sets the student loan plan to “Plan 1”" do
+              claim.student_loan_start_date = :before_first_september_2012
+              claim.save!
+
+              expect(claim.student_loan_plan).to eq("plan_1")
+            end
+          end
+
+          context "which was started after 1 September 2012" do
+            it "sets the student loan plan to “Plan 2”" do
+              claim.student_loan_start_date = :on_or_after_first_september_2012
+              claim.save!
+
+              expect(claim.student_loan_plan).to eq("plan_2")
+            end
+          end
+        end
+
+        context "and studied multiple courses" do
+          before do
+            claim.student_loan_courses = :two_or_more_courses
+          end
+
+          context "which all starter before 1 September 2012" do
+            it "sets the student loan plan to “Plan 1”" do
+              claim.student_loan_start_date = :before_first_september_2012
+              claim.save!
+
+              expect(claim.student_loan_plan).to eq("plan_1")
+            end
+          end
+
+          context "which all starter on or after 1 September 2012" do
+            it "sets the student loan plan to “Plan 2”" do
+              claim.student_loan_start_date = :on_or_after_first_september_2012
+              claim.save!
+
+              expect(claim.student_loan_plan).to eq("plan_2")
+            end
+          end
+
+          context "some of which started before and some of which started on or after 1 September 2012" do
+            it "sets the student loan plan to “Plan 1” and “Plan 2”" do
+              claim.student_loan_start_date = :some_before_some_after_first_september_2012
+              claim.save!
+
+              expect(claim.student_loan_plan).to eq("plan_1_and_2")
+            end
+          end
+        end
       end
     end
   end
