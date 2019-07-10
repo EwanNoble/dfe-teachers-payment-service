@@ -60,6 +60,9 @@ en:
           question: "How many higher education courses have you studied?"
           hint: "This includes university degree, PGCE and Initial Teacher Training courses. "
         student_loan_country: "When you first applied for your student loan in which country was your home address?"
+        student_loan_start_date:
+          single_course: "When did the first year of your higher education course start?"
+          multiple_courses: "When did the first year of each higher education course start?"
       student_loan_amount:
         "How much student loan did you repay while you were at %{claim_school_name} between 6 April XXXX and 5 April
         XXXX?"

@@ -84,6 +84,7 @@ class ClaimsController < ApplicationController
       :student_loan,
       :student_loan_country,
       :student_loan_courses,
+      :student_loan_start_date,
       :student_loan_repayment_amount,
       :email_address,
       :bank_sort_code,

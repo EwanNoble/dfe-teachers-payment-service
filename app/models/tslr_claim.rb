@@ -36,6 +36,12 @@ class TslrClaim < ApplicationRecord
     two_or_more_courses: 1,
   }
 
+  enum student_loan_start_date: {
+    before_first_september_2012: 0,
+    on_or_after_first_september_2012: 1,
+    some_before_some_after_first_september_2012: 2,
+  }
+
   enum employment_status: {
     claim_school: 0,
     different_school: 1,
@@ -82,6 +88,8 @@ class TslrClaim < ApplicationRecord
   validates :student_loan_country,              on: [:"student-loan-country", :submit], presence: {message: "Select a country"}
   validates :student_loan_courses,              on: [:"student-loan-how-many-courses", :submit],
                                                 inclusion: {in: student_loan_courses, message: "Select How many higher education courses have you studied"}
+  validates :student_loan_start_date,           on: [:"student-loan-start-date", :submit],
+                                                inclusion: {in: student_loan_start_dates, message: "Select the first year you higher education course or courses started"}
 
   validates :student_loan_repayment_amount, on: [:"student-loan-amount", :submit], presence: {message: "Enter your student loan repayment amount"}
   validates_numericality_of :student_loan_repayment_amount, message: "Enter a valid monetary amount",

@@ -24,6 +24,7 @@ class PageSequence
     "student-loan",
     "student-loan-country",
     "student-loan-how-many-courses",
+    "student-loan-start-date",
     "student-loan-amount",
     "email-address",
     "bank-details",
@@ -42,11 +43,16 @@ class PageSequence
   def slugs
     SLUGS.dup.tap do |sequence|
       sequence.delete("current-school") if claim.employed_at_claim_school?
+
       unless claim.student_loan?
         sequence.delete("student-loan-country")
         sequence.delete("student-loan-how-many-courses")
+        sequence.delete("student-loan-start-date")
       end
-      sequence.delete("student-loan-how-many-courses") if claim.countries_with_single_student_loan_plan.include?(claim.student_loan_country)
+      if claim.countries_with_single_student_loan_plan.include?(claim.student_loan_country)
+        sequence.delete("student-loan-how-many-courses")
+        sequence.delete("student-loan-start-date")
+      end
     end
   end
 

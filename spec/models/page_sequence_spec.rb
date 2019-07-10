@@ -13,27 +13,33 @@ RSpec.describe PageSequence do
       expect(page_sequence.slugs).not_to include("current-school")
     end
 
-    it "excludes “student-loan-country” when the claimant no longer has a student loan" do
+    it "excludes the skipped slugs when the claimant no longer has a student loan" do
       claim.student_loan = false
       page_sequence = PageSequence.new(claim, "still-teaching")
       expect(page_sequence.slugs).not_to include("student-loan-country")
+      expect(page_sequence.slugs).not_to include("student-loan-how-many-courses")
+      expect(page_sequence.slugs).not_to include("student-loan-start-date")
 
       claim.student_loan = true
       page_sequence = PageSequence.new(claim, "still-teaching")
       expect(page_sequence.slugs).to include("student-loan-country")
+      expect(page_sequence.slugs).to include("student-loan-how-many-courses")
+      expect(page_sequence.slugs).to include("student-loan-start-date")
     end
 
-    it "excludes “student-loan-how-many-courses” when the claimant received their student loan in Scotland or Northern Ireland" do
+    it "excludes the skipped slugs when the claimant received their student loan in Scotland or Northern Ireland" do
       claim.student_loan = true
 
       claim.student_loan_country = "northern_ireland"
 
       page_sequence = PageSequence.new(claim, "still-teaching")
       expect(page_sequence.slugs).not_to include("student-loan-how-many-courses")
+      expect(page_sequence.slugs).not_to include("student-loan-start-date")
 
       claim.student_loan_country = "england"
       page_sequence = PageSequence.new(claim, "still-teaching")
       expect(page_sequence.slugs).to include("student-loan-how-many-courses")
+      expect(page_sequence.slugs).to include("student-loan-start-date")
     end
   end
 

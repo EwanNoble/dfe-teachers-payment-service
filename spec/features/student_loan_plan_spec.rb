@@ -51,6 +51,28 @@ RSpec.feature "Determine student Loan plan" do
       scenario "they are asked how many courses they studied" do
         expect(page).to have_text(I18n.t("tslr.questions.student_loan_repayment_plan.student_loan_how_many_courses.question"))
       end
+
+      context "and they only studied one course" do
+        before do
+          choose "1 course"
+          click_on "Continue"
+        end
+        scenario "they see the start date question for a single course" do
+          expect(page).to have_text(I18n.t("tslr.questions.student_loan_repayment_plan.student_loan_start_date.single_course"))
+          expect(page).not_to have_text("Some of my degree courses started before 1 September 2012 and some started after 1 September 2012")
+        end
+      end
+
+      context "and they only studied two or more courses" do
+        before do
+          choose "2 or more courses"
+          click_on "Continue"
+        end
+        scenario "they see the start date question for more than one course" do
+          expect(page).to have_text(I18n.t("tslr.questions.student_loan_repayment_plan.student_loan_start_date.multiple_courses"))
+          expect(page).to have_text("Some of my degree courses started before 1 September 2012 and some started after 1 September 2012")
+        end
+      end
     end
   end
 end
