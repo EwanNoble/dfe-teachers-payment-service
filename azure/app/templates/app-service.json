@@ -1,0 +1,69 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "planName": {
+      "type": "string"
+    },
+    "serviceName": {
+      "type": "string"
+    },
+    "serviceDockerCompose": {
+      "type": "string"
+    },
+    "serviceAlwaysOn": {
+      "type": "bool"
+    },
+    "serviceAppSettings": {
+      "type": "array"
+    }
+  },
+  "variables": {
+    "batPlatformDeploymentUrlBase": "https://raw.githubusercontent.com/DFE-Digital/bat-platform-building-blocks/master/templates/",
+    "planDeploymentName": "[concat(parameters('planName'), '-deployment')]",
+    "serviceRuntimeStack": "[concat('COMPOSE|', base64(parameters('serviceDockerCompose')))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2017-05-10",
+      "name": "[variables('planDeploymentName')]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('batPlatformDeploymentUrlBase'), 'app-service-plan.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "appServicePlanName": {
+            "value": "[parameters('planName')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2016-08-01",
+      "name": "[parameters('serviceName')]",
+      "type": "Microsoft.Web/sites",
+      "kind": "app,linux,container",
+      "location": "[resourceGroup().location]",
+      "dependsOn": ["[resourceId('Microsoft.Resources/deployments', variables('planDeploymentName'))]"],
+      "properties": {
+        "httpsOnly": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('planName'))]",
+        "siteConfig": {
+          "alwaysOn": "[parameters('serviceAlwaysOn')]",
+          "httpLoggingEnabled": true,
+          "linuxFxVersion": "[variables('serviceRuntimeStack')]",
+          "appSettings": "[parameters('serviceAppSettings')]"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "possibleOutboundIpAddresses": {
+      "type": "array",
+      "value": "[split(reference(parameters('serviceName')).possibleOutboundIpAddresses, ',')]"
+    }
+  }
+}

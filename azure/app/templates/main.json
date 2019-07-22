@@ -6,6 +6,9 @@
       "type": "string",
       "defaultValue": "[resourceGroup().name]"
     },
+    "deploymentBaseCommit": {
+      "type": "string"
+    },
     "alertActionGroupShortName": {
       "type": "string"
     },
@@ -71,9 +74,10 @@
     }
   },
   "variables": {
-    "deploymentUrlBase": "https://raw.githubusercontent.com/DFE-Digital/bat-platform-building-blocks/master/templates/",
+    "deploymentUrlBase": "[concat('https://raw.githubusercontent.com/DFE-Digital/dfe-teachers-payment-service/', parameters('deploymentBaseCommit'), '/azure/app/templates/')]",
+    "batPlatformDeploymentUrlBase": "https://raw.githubusercontent.com/DFE-Digital/bat-platform-building-blocks/master/templates/",
 
-    "appServicePlanDeploymentName": "[concat(parameters('resourceNamePrefix'), '-app-service-plan')]",
+    "appServiceDeploymentName": "[concat(parameters('resourceNamePrefix'), '-app-service')]",
     "databaseServerFirewallRulesDeploymentName": "[concat(parameters('resourceNamePrefix'), '-database-server-firewall-rules')]",
     "databaseServerDeploymentName": "[concat(parameters('resourceNamePrefix'), '-database-server')]",
     "databaseDeploymentName": "[concat(parameters('resourceNamePrefix'), '-database')]",
@@ -84,9 +88,7 @@
     "databaseServerName": "[concat(parameters('resourceNamePrefix'), '-db')]",
 
     "appServicePlanName": "[concat(parameters('resourceNamePrefix'), '-asp')]",
-
     "appServiceName": "[concat(parameters('resourceNamePrefix'), '-as')]",
-    "appServiceRuntimeStack": "[concat('COMPOSE|', base64(parameters('appServiceDockerCompose')))]",
 
     "alertActionGroupName": "[concat(parameters('resourceNamePrefix'), '-alerts-ag')]",
 
@@ -112,7 +114,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'), 'storage-account.json')]",
+          "uri": "[concat(variables('batPlatformDeploymentUrlBase'), 'storage-account.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -130,7 +132,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'), 'postgresql-server.json')]",
+          "uri": "[concat(variables('batPlatformDeploymentUrlBase'), 'postgresql-server.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -160,7 +162,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'), 'postgresql-database.json')]",
+          "uri": "[concat(variables('batPlatformDeploymentUrlBase'), 'postgresql-database.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -175,109 +177,99 @@
     },
     {
       "apiVersion": "2017-05-10",
-      "name": "[variables('appServicePlanDeploymentName')]",
+      "name": "[variables('appServiceDeploymentName')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'), 'app-service-plan.json')]",
+          "uri": "[concat(variables('deploymentUrlBase'), 'app-service.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "appServicePlanName": {
+          "planName": {
             "value": "[variables('appServicePlanName')]"
+          },
+          "serviceName": {
+            "value": "[variables('appServiceName')]"
+          },
+          "serviceDockerCompose": {
+            "value": "[parameters('appServiceDockerCompose')]"
+          },
+          "serviceAlwaysOn": {
+            "value": "[parameters('appServiceAlwaysOn')]"
+          },
+          "serviceAppSettings": {
+            "value": [
+              {
+                "name": "RAILS_ENV",
+                "value": "[parameters('RAILS_ENV')]"
+              },
+              {
+                "name": "RAILS_SERVE_STATIC_FILES",
+                "value": "[parameters('RAILS_SERVE_STATIC_FILES')]"
+              },
+              {
+                "name": "DFE_TEACHERS_PAYMENT_SERVICE_DATABASE_USERNAME",
+                "value": "[concat(parameters('databaseUsername'), '@', variables('databaseServerName'))]"
+              },
+              {
+                "name": "DFE_TEACHERS_PAYMENT_SERVICE_DATABASE_PASSWORD",
+                "value": "[parameters('databasePassword')]"
+              },
+              {
+                "name": "DFE_TEACHERS_PAYMENT_SERVICE_DATABASE_HOST",
+                "value": "[reference(variables('databaseServerDeploymentName')).outputs.fullyQualifiedDomainName.value]"
+              },
+              {
+                "name": "DFE_TEACHERS_PAYMENT_SERVICE_DATABASE_NAME",
+                "value": "[parameters('databaseName')]"
+              },
+              {
+                "name": "SECRET_KEY_BASE",
+                "value": "[parameters('SECRET_KEY_BASE')]"
+              },
+              {
+                "name": "BASIC_AUTH_USERNAME",
+                "value": "[parameters('BASIC_AUTH_USERNAME')]"
+              },
+              {
+                "name": "BASIC_AUTH_PASSWORD",
+                "value": "[parameters('BASIC_AUTH_PASSWORD')]"
+              },
+              {
+                "name": "DFE_SIGN_IN_ISSUER",
+                "value": "[parameters('DFE_SIGN_IN_ISSUER')]"
+              },
+              {
+                "name": "DFE_SIGN_IN_REDIRECT_BASE_URL",
+                "value": "[parameters('DFE_SIGN_IN_REDIRECT_BASE_URL')]"
+              },
+              {
+                "name": "DFE_SIGN_IN_IDENTIFIER",
+                "value": "[parameters('DFE_SIGN_IN_IDENTIFIER')]"
+              },
+              {
+                "name": "DFE_SIGN_IN_SECRET",
+                "value": "[parameters('DFE_SIGN_IN_SECRET')]"
+              },
+              {
+                "name": "NOTIFY_API_KEY",
+                "value": "[parameters('NOTIFY_API_KEY')]"
+              },
+              {
+                "name": "NOTIFY_TEMPLATE_ID",
+                "value": "[parameters('NOTIFY_TEMPLATE_ID')]"
+              },
+              {
+                "name": "ROLLBAR_ACCESS_TOKEN",
+                "value": "[parameters('ROLLBAR_ACCESS_TOKEN')]"
+              },
+              {
+                "name": "ROLLBAR_ENV",
+                "value": "[parameters('ROLLBAR_ENV')]"
+              }
+            ]
           }
-        }
-      }
-    },
-    {
-      "apiVersion": "2016-08-01",
-      "name": "[variables('appServiceName')]",
-      "type": "Microsoft.Web/sites",
-      "kind": "app,linux,container",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', variables('appServicePlanDeploymentName'))]",
-        "[resourceId('Microsoft.Resources/deployments', variables('databaseDeploymentName'))]",
-        "[resourceId('Microsoft.Resources/deployments', variables('databaseServerDeploymentName'))]"
-      ],
-      "properties": {
-        "httpsOnly": true,
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-        "siteConfig": {
-          "alwaysOn": "[parameters('appServiceAlwaysOn')]",
-          "httpLoggingEnabled": true,
-          "linuxFxVersion": "[variables('appServiceRuntimeStack')]",
-          "appSettings": [
-            {
-              "name": "RAILS_ENV",
-              "value": "[parameters('RAILS_ENV')]"
-            },
-            {
-              "name": "RAILS_SERVE_STATIC_FILES",
-              "value": "[parameters('RAILS_SERVE_STATIC_FILES')]"
-            },
-            {
-              "name": "DFE_TEACHERS_PAYMENT_SERVICE_DATABASE_USERNAME",
-              "value": "[concat(parameters('databaseUsername'), '@', variables('databaseServerName'))]"
-            },
-            {
-              "name": "DFE_TEACHERS_PAYMENT_SERVICE_DATABASE_PASSWORD",
-              "value": "[parameters('databasePassword')]"
-            },
-            {
-              "name": "DFE_TEACHERS_PAYMENT_SERVICE_DATABASE_HOST",
-              "value": "[reference(variables('databaseServerDeploymentName')).outputs.fullyQualifiedDomainName.value]"
-            },
-            {
-              "name": "DFE_TEACHERS_PAYMENT_SERVICE_DATABASE_NAME",
-              "value": "[parameters('databaseName')]"
-            },
-            {
-              "name": "SECRET_KEY_BASE",
-              "value": "[parameters('SECRET_KEY_BASE')]"
-            },
-            {
-              "name": "BASIC_AUTH_USERNAME",
-              "value": "[parameters('BASIC_AUTH_USERNAME')]"
-            },
-            {
-              "name": "BASIC_AUTH_PASSWORD",
-              "value": "[parameters('BASIC_AUTH_PASSWORD')]"
-            },
-            {
-              "name": "DFE_SIGN_IN_ISSUER",
-              "value": "[parameters('DFE_SIGN_IN_ISSUER')]"
-            },
-            {
-              "name": "DFE_SIGN_IN_REDIRECT_BASE_URL",
-              "value": "[parameters('DFE_SIGN_IN_REDIRECT_BASE_URL')]"
-            },
-            {
-              "name": "DFE_SIGN_IN_IDENTIFIER",
-              "value": "[parameters('DFE_SIGN_IN_IDENTIFIER')]"
-            },
-            {
-              "name": "DFE_SIGN_IN_SECRET",
-              "value": "[parameters('DFE_SIGN_IN_SECRET')]"
-            },
-            {
-              "name": "NOTIFY_API_KEY",
-              "value": "[parameters('NOTIFY_API_KEY')]"
-            },
-            {
-              "name": "NOTIFY_TEMPLATE_ID",
-              "value": "[parameters('NOTIFY_TEMPLATE_ID')]"
-            },
-            {
-              "name": "ROLLBAR_ACCESS_TOKEN",
-              "value": "[parameters('ROLLBAR_ACCESS_TOKEN')]"
-            },
-            {
-              "name": "ROLLBAR_ENV",
-              "value": "[parameters('ROLLBAR_ENV')]"
-            }
-          ]
         }
       }
     },
@@ -287,12 +279,12 @@
       "type": "Microsoft.Resources/deployments",
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', variables('databaseServerDeploymentName'))]",
-        "[resourceId('Microsoft.Web/sites', variables('appServiceName'))]"
+        "[resourceId('Microsoft.Resources/deployments', variables('appServiceDeploymentName'))]"
       ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'),'postgresql-server-firewall-rules.json')]",
+          "uri": "[concat(variables('batPlatformDeploymentUrlBase'),'postgresql-server-firewall-rules.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -300,7 +292,7 @@
             "value": "[concat(parameters('resourceNamePrefix'), '-')]"
           },
           "ipAddresses": {
-            "value": "[split(reference(variables('appServiceName')).possibleOutboundIpAddresses, ',')]"
+            "value": "[reference(variables('appServiceDeploymentName')).outputs.possibleOutboundIpAddresses.value]"
           },
           "serverName": {
             "value": "[variables('databaseServerName')]"
@@ -475,7 +467,7 @@
       "location": "global",
       "dependsOn": [
         "[resourceId('Microsoft.Insights/actionGroups', variables('alertActionGroupName'))]",
-        "[resourceId('Microsoft.Resources/deployments', variables('appServicePlanDeploymentName'))]"
+        "[resourceId('Microsoft.Resources/deployments', variables('appServiceDeploymentName'))]"
       ],
       "properties": {
         "scopes": ["[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"],
@@ -514,7 +506,7 @@
       "location": "global",
       "dependsOn": [
         "[resourceId('Microsoft.Insights/actionGroups', variables('alertActionGroupName'))]",
-        "[resourceId('Microsoft.Resources/deployments', variables('appServicePlanDeploymentName'))]"
+        "[resourceId('Microsoft.Resources/deployments', variables('appServiceDeploymentName'))]"
       ],
       "properties": {
         "scopes": ["[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"],
@@ -553,7 +545,7 @@
       "location": "global",
       "dependsOn": [
         "[resourceId('Microsoft.Insights/actionGroups', variables('alertActionGroupName'))]",
-        "[resourceId('Microsoft.Web/sites', variables('appServiceName'))]"
+        "[resourceId('Microsoft.Resources/deployments', variables('appServiceDeploymentName'))]"
       ],
       "properties": {
         "scopes": ["[resourceId('Microsoft.Web/sites', variables('appServiceName'))]"],

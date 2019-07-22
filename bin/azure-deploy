@@ -1,12 +1,13 @@
 #!/bin/bash
 set -e
 
-if [ $# -lt 1 ]; then
-  echo "Usage: $0 ENVIRONMENT_NAME"
+if [ $# -lt 2 ] || [[ $1 == --* ]] || [[ $2 == --* ]]; then
+  echo "Usage: $0 ENVIRONMENT_NAME DEPLOYMENT_BASE_COMMIT"
   exit 1
 fi
 
 ENVIRONMENT_NAME=$1
+DEPLOYMENT_BASE_COMMIT=$2
 
 case $ENVIRONMENT_NAME in
   "development")
@@ -40,8 +41,8 @@ LOGIN_TO_AZURE=1
 CONFIRM_BEFORE_DEPLOY=1
 DEPLOY_SECRETS=1
 
-while [ "$2" ]; do
-  case $2 in
+while [ "$3" ]; do
+  case $3 in
     "--skip-login")
       LOGIN_TO_AZURE=
       ;;
@@ -59,7 +60,7 @@ while [ "$2" ]; do
       APP_RESOURCE_GROUP_NAME="$APP_RESOURCE_GROUP_NAME-scratch"
       APP_DEPLOYMENT_NAME="$APP_DEPLOYMENT_NAME-scratch"      ;;
     *)
-      echo "Unexpected argument: $2"
+      echo "Unexpected argument: $3"
       exit 1
       ;;
   esac
@@ -142,6 +143,7 @@ ruby \
     -ne "BEGIN { @body = File.open(\"$APP_DOCKER_COMPOSE_FILE_PATH\").read.gsub(\"\${dockerImageTag}\", \"$DOCKER_IMAGE_TAG\").gsub(\"\n\", \"\\\n\").gsub(\"\\\"\", \"\\\\\\\"\") } ; puts gsub(/\\\${dockerCompose}/, @body)" \
     < "$APP_PARAMETERS_TEMPLATE_FILE_PATH" \
   | sed \
+    -e "s/\${deploymentBaseCommit}/$DEPLOYMENT_BASE_COMMIT/g" \
     -e "s/\${subscriptionId}/$SUBSCRIPTION_ID/g" \
     -e "s/\${keyVaultResourceGroupName}/$SECRETS_RESOURCE_GROUP_NAME/g" \
     -e "s/\${keyVaultName}/$KEYVAULT_NAME/g" \
