@@ -2,6 +2,9 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "deliveryTeamUserGroupObjectId": {
+      "value": "6642920a-1aab-49bb-9a20-365131195349"
+    },
     "alertActionGroupShortName": {
       "value": "d01appalerts"
     },
@@ -10,6 +13,14 @@
     },
     "appServiceHostName": {
       "value": "development.additional-teaching-payment.education.gov.uk"
+    },
+    "appServiceCertificatePassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/${subscriptionId}/resourceGroups/${keyVaultResourceGroupName}/providers/Microsoft.KeyVault/vaults/${keyVaultName}"
+        },
+        "secretName": "AppServiceCertificatePassword"
+      }
     },
     "databaseName": {
       "value": "development"
