@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   get "/privacy_policy", to: "pages#privacy_policy"
   get "/terms_conditions", to: "pages#terms_conditions"
   get "/cookies", to: "pages#cookies"
+  get "/accessibility_statement", to: "pages#accessibility_statement"
 
   constraints slug: %r{#{PageSequence::SLUGS.join("|")}} do
     resources :claims, only: [:new, :create, :show, :update], param: :slug, path: "/claim"
