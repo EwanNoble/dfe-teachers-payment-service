@@ -134,6 +134,10 @@
     "appServiceName": "[concat(parameters('resourceNamePrefix'), '-as')]",
     "appServiceRuntimeStack": "[concat('DOCKER|', parameters('appServiceDockerImage'))]",
 
+    "appWorkerDeploymentName": "[concat(parameters('resourceNamePrefix'), '-app-worker')]",
+    "appWorkerContainerInstanceName": "[concat(parameters('resourceNamePrefix'), '-worker-ci')]",
+    "appWorkerContainerName": "[concat(parameters('resourceNamePrefix'), '-worker-container')]",
+
     "vspAppServicePlanName": "[concat(parameters('resourceNamePrefix'), '-vsp-asp')]",
     "vspAppServiceName": "[concat(parameters('resourceNamePrefix'), '-vsp-as')]",
     "vspAppServiceRuntimeStack": "[concat('DOCKER|', parameters('vspAppServiceDockerImage'))]"
@@ -422,6 +426,102 @@
           },
           "serverName": {
             "value": "[variables('databaseServerName')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "name": "[variables('appWorkerDeploymentName')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', variables('databaseDeploymentName'))]",
+        "[resourceId('Microsoft.Resources/deployments', variables('databaseServerDeploymentName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('batPlatformDeploymentUrlBase'), 'container-instances.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "containerInstanceName": {
+            "value": "[variables('appWorkerContainerInstanceName')]"
+          },
+          "containerName": {
+            "value": "[variables('appWorkerContainerName')]"
+          },
+          "imageName": {
+            "value": "[parameters('appServiceDockerImage')]"
+          },
+          "command": {
+            "value": [
+              "rake",
+              "jobs:work"
+            ]
+          },
+          "osType": {
+            "value": "Linux"
+          },
+          "environmentVariables": {
+            "value": [
+              {
+                "name": "RAILS_ENV",
+                "value": "[parameters('RAILS_ENV')]"
+              },
+              {
+                "name": "DFE_TEACHERS_PAYMENT_SERVICE_DATABASE_USERNAME",
+                "value": "[concat(parameters('databaseUsername'), '@', variables('databaseServerName'))]"
+              },
+              {
+                "name": "DFE_TEACHERS_PAYMENT_SERVICE_DATABASE_PASSWORD",
+                "value": "[parameters('databasePassword')]"
+              },
+              {
+                "name": "DFE_TEACHERS_PAYMENT_SERVICE_DATABASE_HOST",
+                "value": "[reference(resourceId('Microsoft.Resources/deployments', variables('databaseServerDeploymentName'))).outputs.fullyQualifiedDomainName.value]"
+              },
+              {
+                "name": "DFE_TEACHERS_PAYMENT_SERVICE_DATABASE_NAME",
+                "value": "[parameters('databaseName')]"
+              },
+              {
+                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value": "[reference(resourceId('Microsoft.Resources/deployments', variables('applicationInsightsDeploymentName'))).outputs.instrumentationKey.value]"
+              },
+              {
+                "name": "SECRET_KEY_BASE",
+                "value": "[parameters('SECRET_KEY_BASE')]"
+              },
+              {
+                "name": "DFE_SIGN_IN_API_CLIENT_ID",
+                "value": "[parameters('DFE_SIGN_IN_API_CLIENT_ID')]"
+              },
+              {
+                "name": "DFE_SIGN_IN_API_SECRET",
+                "value": "[parameters('DFE_SIGN_IN_API_SECRET')]"
+              },
+              {
+                "name": "DFE_SIGN_IN_API_ENDPOINT",
+                "value": "[parameters('DFE_SIGN_IN_API_ENDPOINT')]"
+              },
+              {
+                "name": "NOTIFY_API_KEY",
+                "value": "[parameters('NOTIFY_API_KEY')]"
+              },
+              {
+                "name": "NOTIFY_TEMPLATE_ID",
+                "value": "[parameters('NOTIFY_TEMPLATE_ID')]"
+              },
+              {
+                "name": "ROLLBAR_ACCESS_TOKEN",
+                "value": "[parameters('ROLLBAR_ACCESS_TOKEN')]"
+              },
+              {
+                "name": "ROLLBAR_ENV",
+                "value": "[parameters('ROLLBAR_ENV')]"
+              }
+            ]
           }
         }
       }
