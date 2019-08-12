@@ -2,14 +2,14 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "appServiceDockerCompose": {
-      "value": "${dockerCompose}"
-    },
     "appServiceHostName": {
       "value": "additional-teaching-payment.education.gov.uk"
     },
     "appServiceCertificateSecretName": {
       "value": "sslCertificate-additional-teaching-payment-education-gov-uk"
+    },
+    "appServiceDockerImage": {
+      "value": "dfedigital/teacher-payments-service:${dockerImageTag}"
     },
     "vspAppServiceDockerImage": {
       "value": "dfedigital/teacher-payments-service-verify:${vspDockerImageTag}"
