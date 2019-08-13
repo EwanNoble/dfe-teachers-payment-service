@@ -2,6 +2,9 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "appInsightsName" : {
+      "type": "string"
+    },
     "alertNamePrefix": {
       "type": "string"
     },
@@ -194,8 +197,11 @@
       "name": "[variables('appServiceWebTestName')]",
       "type": "Microsoft.Insights/webtests",
       "apiVersion": "2015-05-01",
-      "location": "global",
+      "location": "[resourceGroup().location]",
       "kind": "ping",
+      "tags": {
+                "[concat('hidden-link:', resourceId('microsoft.insights/components/', parameters('appInsightsName')))]": "Resource"
+      },
       "properties": {
         "Name": "[variables('appServiceWebTestName')]",
         "Enabled": true,
